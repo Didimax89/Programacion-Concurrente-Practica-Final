@@ -16,22 +16,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClienteGUI extends JFrame {
-
-	private static final String IP_SERVIDOR = "localhost";
+	
 	private static final int PUERTO_SERVIDOR = 5000;
 
 	private JTextArea _areaTexto;
 	private BufferDescargas _buffer;
 	private Usuario _usuario;
-	private ObjectOutputStream _out;
-	private Socket _socket;
 	private List<Usuario> _catalogoRed = new ArrayList<>();
-	private Locks _lockRed = new LockTicket();
+	private OyenteServidor _oyenteServidor;
+	private String _ipServidor;
 
 	public ClienteGUI() {
 		// 1. Pedir nombre e IP del servidor
-		String ipServidor = JOptionPane.showInputDialog("Introduce la IP del servidor principal:", "localhost");
-		if (ipServidor == null || ipServidor.trim().isEmpty()) {
+		_ipServidor = JOptionPane.showInputDialog("Introduce la IP del servidor principal:", "localhost");
+		if (_ipServidor == null || _ipServidor.trim().isEmpty()) {
 			System.exit(0);
 		}
 
@@ -81,9 +79,9 @@ public class ClienteGUI extends JFrame {
 		// 5. Eventos de los botones
 		btnBuscar.addActionListener(e -> {
             escribirEnPantalla(">> Refrescando catalogo de libros...");
-            try {
-            	_lockRed.enviarMensajeSeguro(0, _out, new Mensaje.BuscarUsuarios());
-            } catch (Exception ex) {}
+            if (_oyenteServidor != null) {
+                _oyenteServidor.pedirCatalogo();
+            }
         });
 
 		btnDescargar.addActionListener(e -> {
@@ -130,12 +128,15 @@ public class ClienteGUI extends JFrame {
         });
 
 		btnSalir.addActionListener(e -> {
-			escribirEnPantalla("Desconectando...");
-			System.exit(0);
-		});
+            escribirEnPantalla("Desconectando...");
+            if (_oyenteServidor != null) {
+                _oyenteServidor.desconectar();
+            }
+            System.exit(0); 
+        });
 
 		// 6. Conectar al servidor y arrancar los hilos
-		conectarServidor();
+		conectarServidor(_ipServidor);
 		arrancarHilosDescarga();
 		
 		// Arrancamos nuestro propio hilo para que otros puedan descargarnos archivos
@@ -143,21 +144,16 @@ public class ClienteGUI extends JFrame {
 	}
 
 	// Metodo para conectar con el servidor
-	private void conectarServidor() {
-		try {
-			_socket = new Socket(IP_SERVIDOR, PUERTO_SERVIDOR);
-			_out = new ObjectOutputStream(_socket.getOutputStream());
-			
-			Mensaje.Conexion msgConexion = new Mensaje.Conexion(_usuario);
-			_lockRed.enviarMensajeSeguro(0, _out, msgConexion);
-			
-			escribirEnPantalla("Conectado al servidor principal con exito");
-			
-			new OyenteServidor(_socket, this).start(); // Empezamos a escuchar
-		} catch (Exception e) {
-			escribirEnPantalla("ERROR: No se pudo conectar al servidor");
-		}
-	}
+	private void conectarServidor(String ipServidor) {
+        try {
+            _oyenteServidor = new OyenteServidor(ipServidor, PUERTO_SERVIDOR, _usuario, this);
+            _oyenteServidor.conectar();
+            
+            escribirEnPantalla("Conectado al servidor principal con exito");
+        } catch (Exception e) {
+            escribirEnPantalla("ERROR: No se pudo conectar al servidor principal.");
+        }
+    }
 
 	// Metodo para arrancar los Consumidores
 	private void arrancarHilosDescarga() {
@@ -192,17 +188,15 @@ public class ClienteGUI extends JFrame {
     }
 	
 	public void notificarDescargaCompletada(String archivo) {
-        // Lo añadimos a nuestra lista local
         if (!_usuario.getArchivosCompartidos().contains(archivo)) {
             _usuario.getArchivosCompartidos().add(archivo);
         }
-        // Avisamos al servidor central
-        try {
-            _lockRed.enviarMensajeSeguro(0, _out, new Mensaje.NotificarNuevoArchivo(archivo));
-        } catch (Exception e) {}
+        if (_oyenteServidor != null) {
+            _oyenteServidor.notificarNuevoArchivo(archivo);
+        }
     }
 
-	// El Main arranca la Interfaz Grafica
+	// El main arranca la interfaz grafica
 	public static void main(String[] args) {
 		// Aseguramos que la GUI se crea en el hilo de eventos correcto
 		SwingUtilities.invokeLater(() -> {
