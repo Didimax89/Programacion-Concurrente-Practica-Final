@@ -51,7 +51,7 @@ public class ClienteGUI extends JFrame {
             System.out.println("No se pudo obtener la IP real, usando localhost.");
         }
 		
-		int miPuertoP2P = (int)(Math.random() * 1000 + 6000); // TODO mirar esto del random
+		int miPuertoP2P = (int)(Math.random() * 1000 + 6000);
 		_usuario = new Usuario(nombre, miIpReal, miPuertoP2P, misArchivos);
 		_buffer = new BufferDescargas(5); // Buffer protegido por semaforos
 
@@ -131,7 +131,7 @@ public class ClienteGUI extends JFrame {
 
 		btnSalir.addActionListener(e -> {
 			escribirEnPantalla("Desconectando...");
-			System.exit(0); // TODO Aqui enviariamos el mensaje de desconexión al servidor
+			System.exit(0);
 		});
 
 		// 6. Conectar al servidor y arrancar los hilos
