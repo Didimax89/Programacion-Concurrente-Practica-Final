@@ -21,7 +21,12 @@ public class Estadisticas {
 		}
 	}
 
-	public int getTotalDescargas() {
-		return _totalDescargas;
-	}
+	public int getTotalDescargas(int idHilo) {
+        _lock.takeLock(idHilo); // Exclusion mutua para leer
+        try {
+            return _totalDescargas;
+        } finally {
+            _lock.releaseLock(idHilo);
+        }
+    }
 }

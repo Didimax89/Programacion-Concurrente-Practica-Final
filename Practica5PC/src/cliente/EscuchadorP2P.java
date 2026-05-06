@@ -5,24 +5,24 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class EscuchadorP2P extends Thread {
-    private int _puerto;
+	private ServerSocket _serverSocket;
     private String _nombreUsuario;
     private ClienteGUI _ventana;
 
-    public EscuchadorP2P(int puerto, String nombreUsuario, ClienteGUI ventana) {
-        this._puerto = puerto;
+    public EscuchadorP2P(ServerSocket socket, String nombreUsuario, ClienteGUI ventana) {
+    	this._serverSocket = socket;
         this._nombreUsuario = nombreUsuario;
         this._ventana = ventana;
     }
 
     @Override
     public void run() {
-        try (ServerSocket serverSocket = new ServerSocket(_puerto)) {
-            _ventana.escribirEnPantalla("[P2P] Escuchando peticiones de otros clientes en el puerto " + _puerto);
+        try {
+        	_ventana.escribirEnPantalla("[P2P] Escuchando peticiones en el puerto " + _serverSocket.getLocalPort());
             
             while (true) {
                 // Alguien se ha conectado para pedirnos un archivo
-                Socket socketPeticion = serverSocket.accept();
+            	Socket socketPeticion = _serverSocket.accept();
                 
                 // Atendemos la peticion en un hilo nuevo para no bloquearnos
                 new HiloEmisor(socketPeticion, _nombreUsuario, _ventana).start();

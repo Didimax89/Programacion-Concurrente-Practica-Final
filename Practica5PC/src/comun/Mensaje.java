@@ -16,79 +16,92 @@ public abstract class Mensaje implements Serializable {
 	
 	// TIPO 1: Cliente se conecta al Servidor
     public static class Conexion extends Mensaje {
+    	private static final long serialVersionUID = 1L;
         private Usuario _usuario;
         
         public Conexion(Usuario usuario) {
             super(1);
             this._usuario = usuario;
         }
+        
         public Usuario getUsuario() { return _usuario; }
     }
     
     // TIPO 2: Servidor confirma la conexion al Cliente
     public static class ConfirmacionConexion extends Mensaje {
+    	private static final long serialVersionUID = 1L;
         private String _textoConfirmacion;
         
         public ConfirmacionConexion(String texto) {
             super(2);
             this._textoConfirmacion = texto;
         }
+        
         public String getTextoConfirmacion() { return _textoConfirmacion; }
     }
     
     // TIPO 3: Cliente pide el catalogo al Servidor
     public static class BuscarUsuarios extends Mensaje {
-        public BuscarUsuarios() {
-            super(3);
-        }
+    	private static final long serialVersionUID = 1L;
+    	
+        public BuscarUsuarios() { super(3); }
     }
     
     // TIPO 4: Servidor envia el catalogo al Cliente
     public static class RespuestaBusqueda extends Mensaje {
+    	private static final long serialVersionUID = 1L;
         private List<Usuario> _usuariosConectados;
         
         public RespuestaBusqueda(List<Usuario> usuarios) {
             super(4);
             this._usuariosConectados = usuarios;
         }
+        
         public List<Usuario> getUsuariosConectados() { return _usuariosConectados; }
     }
     
     // TIPO 5: Saludo inicial P2P
     public static class SaludoP2P extends Mensaje {
+    	private static final long serialVersionUID = 1L;
         private String _nombreSolicitante;
         
         public SaludoP2P(String nombreSolicitante) {
             super(5);
             this._nombreSolicitante = nombreSolicitante;
         }
+        
         public String getNombreSolicitante() { return _nombreSolicitante; }
     }
     
     // TIPO 6: Confirmacion del saludo
     public static class ConfirmacionSaludoP2P extends Mensaje {
+    	private static final long serialVersionUID = 1L;
         private boolean _aceptado;
         
         public ConfirmacionSaludoP2P(boolean aceptado) {
             super(6);
             this._aceptado = aceptado;
         }
+        
         public boolean isAceptado() { return _aceptado; }
     }
     
     // TIPO 7: Peticion de un archivo concreto
     public static class PeticionArchivoP2P extends Mensaje {
+        private static final long serialVersionUID = 1L;
         private String _nombreArchivo;
         
         public PeticionArchivoP2P(String nombreArchivo) {
             super(7);
             this._nombreArchivo = nombreArchivo;
         }
+        
         public String getNombreArchivo() { return _nombreArchivo; }
     }
     
     // TIPO 8: Respuesta con el estado del archivo y su tamaño
     public static class RespuestaArchivoP2P extends Mensaje {
+        private static final long serialVersionUID = 1L;
         private boolean _existe;
         private long _tamanoBytes;
         
@@ -97,6 +110,7 @@ public abstract class Mensaje implements Serializable {
             this._existe = existe;
             this._tamanoBytes = tamanoBytes;
         }
+        
         public boolean isExiste() { return _existe; }
         public long getTamanoBytes() { return _tamanoBytes; }
     }
@@ -105,6 +119,7 @@ public abstract class Mensaje implements Serializable {
     public static class NotificarNuevoArchivo extends Mensaje {
         private static final long serialVersionUID = 1L;
         private String _archivo;
+        
         public NotificarNuevoArchivo(String a) { super(9); this._archivo = a; }
         public String getNombreArchivo() { return _archivo; }
     }
@@ -112,6 +127,7 @@ public abstract class Mensaje implements Serializable {
     // TIPO 10: Respuesta de recibo P2P
     public static class FinDescargaP2P extends Mensaje {
         private static final long serialVersionUID = 1L;
+        
         public FinDescargaP2P() { super(10); }
     }
 }

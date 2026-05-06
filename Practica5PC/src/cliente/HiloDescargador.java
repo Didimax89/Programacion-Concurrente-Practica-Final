@@ -1,4 +1,5 @@
 package cliente;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
@@ -81,7 +82,9 @@ public class HiloDescargador extends Thread {
                         _lockRed.enviarMensajeSeguro(_idHilo, out, new Mensaje.FinDescargaP2P());
                         
                         _estadisticas.registrarDescarga(_idHilo);
+                        int total = _estadisticas.getTotalDescargas(_idHilo);
                         _ventanaCliente.escribirEnPantalla("Hilo " + _idHilo + " | DESCARGA COMPLETADA: " + peticion.getArchivo());
+                        _ventanaCliente.escribirEnPantalla("Libros totales descargados en esta sesion: " + total);
                         
                         _ventanaCliente.notificarDescargaCompletada(peticion.getArchivo());
                     } else {

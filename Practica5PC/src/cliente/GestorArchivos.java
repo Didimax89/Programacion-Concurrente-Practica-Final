@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import comun.Consola;
+
 public class GestorArchivos {
 	private String _rutaCarpeta;
 
@@ -21,9 +23,9 @@ public class GestorArchivos {
 		// Si la carpeta no existe, la creamos
 		if (!carpeta.exists()) {
 			carpeta.mkdirs();
-			System.out.println("Carpeta de libros creada: " + _rutaCarpeta);
+			Consola.escribir("Carpeta de libros creada: " + _rutaCarpeta);
 		} else {
-			System.out.println("Carpeta de libros encontrada: " + _rutaCarpeta);
+			Consola.escribir("Carpeta de libros encontrada: " + _rutaCarpeta);
 		}
 	}
 

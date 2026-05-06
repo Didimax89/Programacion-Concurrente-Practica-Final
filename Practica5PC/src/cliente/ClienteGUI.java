@@ -1,17 +1,11 @@
 package cliente;
 import javax.swing.*;
 
-import comun.Mensaje;
 import comun.Usuario;
-import comun.Locks;
-import comun.LockTicket;
-
+import comun.Consola;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,13 +38,24 @@ public class ClienteGUI extends JFrame {
         
         String miIpReal = "127.0.0.1";
         try {
-            miIpReal = InetAddress.getLocalHost().getHostAddress(); // Coge la IP real de tu tarjeta de red (ej. 192.168.1.50)
+        	miIpReal = InetAddress.getLocalHost().getHostAddress(); // Coge la IP real de tu tarjeta de red (ej. 192.168.1.50)
         } catch (Exception e) {
-            System.out.println("No se pudo obtener la IP real, usando localhost.");
+        	Consola.escribir("No se pudo obtener la IP real, usando localhost.");
         }
 		
-		int miPuertoP2P = (int)(Math.random() * 1000 + 6000);
-		_usuario = new Usuario(nombre, miIpReal, miPuertoP2P, misArchivos);
+        Consola.escribir("Mi IP P2P capturada es: " + miIpReal);
+        
+        // Pedir puerto seguro al SO
+        ServerSocket socketSeguroP2P = null;
+        int miPuertoP2P = 0;
+        try {
+            socketSeguroP2P = new ServerSocket(0); // El 0 le dice al SO que nos de uno libre
+            miPuertoP2P = socketSeguroP2P.getLocalPort(); // Guardamos el que nos ha tocado
+        } catch (Exception e) {
+            System.exit(0);
+        }
+
+        _usuario = new Usuario(nombre, miIpReal, miPuertoP2P, misArchivos);
 		_buffer = new BufferDescargas(5); // Buffer protegido por semaforos
 
 		// 2. Configurar la ventana principal
@@ -140,7 +145,7 @@ public class ClienteGUI extends JFrame {
 		arrancarHilosDescarga();
 		
 		// Arrancamos nuestro propio hilo para que otros puedan descargarnos archivos
-		new EscuchadorP2P(_usuario.getPuertoP2P(), _usuario.getNombre(), this).start();
+		new EscuchadorP2P(socketSeguroP2P, _usuario.getNombre(), this).start();
 	}
 
 	// Metodo para conectar con el servidor
